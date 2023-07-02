@@ -117,6 +117,15 @@
           - username: liam
 
 
+    - name: Clone powerlevel10k zsh theme repo
+      git:
+        repo: https://github.com/romkatv/powerlevel10k.git
+        dest: ~/powerlevel10k
+        depth: 1
+
+    - name: add powerlevel10k theme to zsh config
+      shell: echo 'source ~/powerlevel10k/powerlevel10k.zsh-theme' >>~/.zshrc
+
     - name: ensure zsh is default shell
       become: yes
       shell: chsh -s $(which zsh)
