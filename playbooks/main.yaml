@@ -82,8 +82,18 @@
           - htop
           - tmux
           - keepassxc
-          - nodejs
           - npm
+
+    - name: update npm
+      shell: npm install -g npm
+
+    - name: install nodejs using nodesource
+      become: true
+      shell: curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash
+
+    - name: install nodejs
+      apt:
+        pkg: nodejs
 
     - name: install Obsidian from deb
       apt:
