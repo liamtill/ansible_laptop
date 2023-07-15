@@ -64,6 +64,28 @@
       apt_repository:
         repo: ppa:phoerious/keepassxc
 
+    - name: Add firefox ppa repo
+      apt_repository:
+        repo: ppa:mozillateam/ppa
+
+    - name: prioritise apt version of firefox over snap
+      become: true
+      shell: |
+          echo '
+          Package: *
+          Pin: release o=LP-PPA-mozillateam
+          Pin-Priority: 1001
+
+          Package: firefox
+          Pin: version 1:1snap1-0ubuntu2
+          Pin-Priority: -1
+          ' | tee /etc/apt/preferences.d/mozilla-firefox
+
+    - name: Remove firefox snap because its a PITA
+      snap:
+        name: firefox
+        state: absent
+
     - name: apt update
       become: yes
       apt:
@@ -83,6 +105,13 @@
           - tmux
           - keepassxc
           - npm
+          - firefox
+          - hugo
+
+    - name: ensure unattended upgrades does not reinsall snap version of firefox
+      become: true
+      shell: |
+        echo 'Unattended-Upgrade::Allowed-Origins:: "LP-PPA-mozillateam:${distro_codename}";' | tee /etc/apt/apt.conf.d/51unattended-upgrades-firefox
 
     - name: update npm
       shell: npm install -g npm
@@ -146,6 +175,21 @@
     - name: start syncthing
       shell: /usr/bin/syncthing serve --no-browser --logfile=default &
 
+    - name: autostart syncthing on login
+      copy:
+        dest: /home/{{ ansible_user }}/.config/autostart/syncthing-start.desktop
+        content: |
+          [Desktop Entry]
+          Categories=Network;FileTransfer;P2P
+          Comment=Starts the main syncthing process in the background.
+          Exec=/usr/bin/syncthing serve --no-browser --logfile=default
+          GenericName=File synchronization
+          Icon=syncthing
+          Keywords=synchronization;daemon;
+          Name=Start Syncthing
+          Terminal=false
+          Type=Application
+
     - name: download go tar
       get_url:
         url: "https://go.dev/dl/go{{ go_version }}.linux-amd64.tar.gz "
@@ -176,4 +220,3 @@
       snap:
         name: 
           - tradingview
-          - hugo
