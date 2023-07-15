@@ -94,6 +94,8 @@
     - name: install nodejs
       apt:
         pkg: nodejs
+    - name: run syncthing 
+      shell: syncthing serve --no-browser --logfile=default
 
     - name: install Obsidian from deb
       apt:
